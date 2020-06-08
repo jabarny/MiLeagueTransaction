@@ -1,0 +1,41 @@
+""" a storage file with variables of links"""
+
+TXL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=109'
+CAL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=110'
+SOU = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=111'
+PCL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=112'
+EAS = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=113'
+SAL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=116'
+INT = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=117'
+MWL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=118'
+AFL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=119'
+APP = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=120'
+AZL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=121'
+CRL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=122'
+FSL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=123'
+GCL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=124'
+MEX = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=125'
+NWL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=126'
+NYP = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=127'
+PIO = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=128'
+DSL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=130'
+DWL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=131'
+XWL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=132'
+PRL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=133'
+VWL = 'http://www.milb.com/milb/stats/stats.jsp?t=l_trn&lid=135'
+
+# ALL LEAGUE TRANSACTIONS
+all_lg = [TXL, CAL, SOU, PCL, EAS, SAL, INT, MWL, AFL, APP, AZL, CRL, FSL, GCL, MEX, NWL, NYP, PIO, DSL, DWL, XWL, PRL, VWL]
+
+# REGULAR SEASON TRANSACTIONS
+regular_lg = [TXL, CAL, SOU, PCL, EAS, SAL, INT, MWL, AFL, APP, AZL, CRL, FSL, GCL, MEX, NWL, NYP, PIO, DSL]
+
+# SHORT SEASON LEAGUE TRANSACTIONS
+short_lg = [APP, AZL, GCL, NWL, NYP, PIO, DSL]
+
+# FULL SEASON LEAGUE TRANSACTIONS
+full_lg = [TXL, CAL, SOU, PCL, EAS, SAL, INT, MWL, CRL, FSL, MEX, ]
+
+# WINTER SEASON LEAGUE
+winter_lg = [AFL, DWL, XWL, PRL, VWL, ]
+
