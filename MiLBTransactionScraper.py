@@ -37,8 +37,7 @@ def FLgTransact():
     for url in full_lg:
         try:
             driver.get(url)
-            # time.sleep(3)
-            for mon in range(starting_month, ending_month):  # range must begin at 1 for first month of year up to 13
+            for mon in range(starting_month, ending_month):  # range must begin at 1 for first month of year up to 13 for 12th month
                 completing += 1
                 progress = int(100 * completing / total)
                 progress_bar = str(progress) + '%'
@@ -62,9 +61,9 @@ def FLgTransact():
                     time.sleep(2)
 
                     # note: html changes after reinitializing content and soup
-                    # reassigning variables for new html source
+                    # reassigning variables for new htmlsoup
                     milbcontent = driver.page_source.encode(
-                        'utf-8').strip()  # note: since page is JS-rendered, have to use selenium
+                        'utf-8').strip()  # note: since page is JS-rendered, using selenium
 
 
                     # to assign title
@@ -77,7 +76,7 @@ def FLgTransact():
                     title = re.findall(r'^[a-zA-Z ]+', milbsouptitle.text)[0].strip()
                     # transaction dates
                     dates = re.findall(r'\d{2}/\d{2}/\d{4}', str(
-                        milbsoup.tbody))  # note: occasionally, and seemingly arbitrarily, regex does not find text
+                        milbsoup.tbody))
 
                     year = milbsoup.find('span').text
                     if not dates:
