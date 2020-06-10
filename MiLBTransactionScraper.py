@@ -1,66 +1,123 @@
-#! python3 -i FLgTransactions.py
-# a script that prints minor league transactions.
+#! python3 -i MiLBTransactionsv2.py
+# a script that opens, scrapes minor league transactions from milb.com pages.
 
 import datetime as dt
+import time
+import calendar
 import re
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
+from links import full_lg, CAL, SOU, EAS
 from selenium import webdriver
+import selenium.webdriver.support.ui as ui
+from selenium.webdriver.common.by import \
+    By  # Note: for the XPATHS elements more info: https://stackoverflow.com/questions/59130200/selenium-wait-until-element-is-present-visible-and-interactable
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support import expected_conditions as EC  # NOTE: webdriverwait conditions
 from selenium.webdriver.chrome.options import Options
-from bs4 import SoupStrainer
-import links # make sure in proper folder. more info: https://stackoverflow.com/questions/17255737/importing-variables-from-another-file
 
 options = Options()  # makes Webdriver wait for the entire page is loaded when set to 'normal'
-options.page_load_strategy = 'normal' # for more info on page loading: https://www.selenium.dev/documentation/en/webdriver/page_loading_strategy/
+options.page_load_strategy = 'normal'
+# for more info on page loading: https://www.selenium.dev/documentation/en/webdriver/page_loading_strategy/
 driver = webdriver.Chrome(options=options)
 
-link = [SOU] # imported variable links to be looped through
+# in order of html tree
+milbtitle = SoupStrainer('title')
+milbstatscontainer = SoupStrainer(id='statsContainer')
 
-
+print('Minor League Transactions scraping started...')
 def FLgTransact():
+    # progress bar & month ranges
+    starting_month = 6
+    ending_month = 7
+    total = len(full_lg) * int(ending_month - starting_month)
+    completing = 0
+
     start = dt.datetime.now()
     print('~' * 70 + ' \nStart Time: ' + start.strftime("%b, %d | %H:%M:%S %p") + '\n' + '~' * 70)
-    for url in link:
+    for url in full_lg:
         try:
-            driver = webdriver.Chrome()
             driver.get(url)
-            milbcontent = driver.page_source.encode('utf-8').strip()
-            milbtbody = SoupStrainer('tbody')  # to parse only a specific html section; link: https://beautiful-soup-4.readthedocs.io/en/latest/index.html?highlight=resultset#parsing-only-part-of-a-document
-            milbsoup = BeautifulSoup(milbcontent, 'lxml', parse_only=milbtbody)
+            # time.sleep(3)
+            for mon in range(starting_month, ending_month):  # range must begin at 1 for first month of year up to 13
+                completing += 1
+                progress = int(100 * completing / total)
+                progress_bar = str(progress) + '%'
 
-            driver.close()
-            dates = re.findall(r'\d{2}/\d{2}/\d{4}', str(milbsoup))  # reported date of transaction
-            
-            headers = re.findall(r'">(\D+?)</', str(milbsoup))[:5]  # a Regex that finds the headers
+                month = calendar.month_name[mon]
+                try:
 
-            # a Regex that finds the transactions cells
-            transaction_cells = re.findall(r'">([123\D]+?)</', str(milbsoup))[6:]  # will always be a multiple of 4 i.e. 4,8,12,etc.
+                    # clicking through javascript
+                    js_month_selector_xpath = '//*[@id="statsContainer"]/a'
+                    # js_month_selector_elem = driver.find_element_by_xpath(js_month_selector_xpath)
+                    js_month_selector_elem = ui.WebDriverWait(driver, 5).until(
+                        EC.element_to_be_clickable((By.XPATH, js_month_selector_xpath)))
+                    js_month_selector_elem.click()
 
-            # string whitespacing
-            e = len(dates[0])
-            f = e + 15
-            g = f + 15
+                    js_month_xpath = '//*[@id="monthSelContainer"]/ul/li[{}]/a'.format(mon)
+                    # js_month_elem = driver.find_element_by_xpath(js_month_xpath)
+                    js_month_elem = ui.WebDriverWait(driver, 3).until(
+                        EC.element_to_be_clickable((By.XPATH, js_month_xpath)))
+                    js_month_elem.click()
 
-            print('-' * 70)
-            print('TRANSACTIONS FOR ' + headers[0] + '. \nLink: ' + url)
-            print(dt.datetime.now().strftime('%b, %d | %H:%M:%S %p'))
-            print('-' * 70)
-            print('DATE'.rjust(e, ' '), end='')
-            print('LEAGUE TRANSACTIONS'.rjust(f, ' '), end='')
-            print('TRANSACTIONS DESCRIPTION'.rjust(g, ' '))
-            m = 0
-            for x in range(3, len(transaction_cells), 4):
-                print(dates[m], end=" | ") # prints transaction date
-                print(headers[0] + ' | ', end='') # prints league
-                print(transaction_cells[x]) # prints transaction
-                m += 1
-            end = dt.datetime.now()
-            print('+' * 70 + ' \nEnd Time: ' + dt.datetime.now() + '\n' + '+' * 70)
-            print('Total Web Scraping Time: ' + str(end - start), end='\n') # total script time
+                    time.sleep(2)
+
+                    # note: html changes after reinitializing content and soup
+                    # reassigning variables for new html source
+                    milbcontent = driver.page_source.encode(
+                        'utf-8').strip()  # note: since page is JS-rendered, have to use selenium
+
+
+                    # to assign title
+                    milbsoup = BeautifulSoup(milbcontent, 'lxml', parse_only=milbstatscontainer)
+
+                    milbsouptitle = BeautifulSoup(milbcontent, 'lxml',
+                                                  parse_only=milbtitle)  #todo javier research if this multiple initializations of BeautifulSoup affects performance
+                    # regexes; note: transaction regex is saved in MiLBTransactionsv0.py
+                    # a Regex that finds the headers from html <title> tag
+                    title = re.findall(r'^[a-zA-Z ]+', milbsouptitle.text)[0].strip()
+                    # transaction dates
+                    dates = re.findall(r'\d{2}/\d{2}/\d{4}', str(
+                        milbsoup.tbody))  # note: occasionally, and seemingly arbitrarily, regex does not find text
+
+                    year = milbsoup.find('span').text
+                    if not dates:
+                        print('!' * 70)
+                        print('No {} for {} {} - {}.'.format(title, month, year, progress_bar))
+                        print('!' * 70)
+                    else:
+                        # for string whitespacing
+                        zero = 0
+                        e = len(dates[zero])
+                        f = e + 15
+                        g = f + 15
+                        print('-' * 70)
+                        print('{} for {} {} - {}\nLink: '.format(title, month, year, progress_bar) + url)
+                        print('Scripted started at {} | '.format(start.strftime('%H:%M:%S')), end='')
+                        print('Current time: ' + dt.datetime.now().strftime('%b, %d | %H:%M:%S %p'))
+                        print('-' * 70)
+                        find_count = len(milbsoup.tbody.find_all('td', {'align': 'left'}))
+                        date_inc = 0
+                        comment_inc = 4
+                        print('date'.rjust(e, ' ').upper(), end='')
+                        print('league transactions'.rjust(f, ' ').upper(), end='')
+                        print('transactions description'.rjust(g, ' ').upper())
+                        for x in range(int(find_count / 5)):
+                            print(milbsoup.tbody.find_all('td', {'align': 'left'})[date_inc].string, end=' | ')
+                            print(title + ' | ', end='')
+                            print(milbsoup.tbody.find_all('td', {'align': 'left'})[comment_inc].string)
+                            date_inc += 5
+                            comment_inc += 5
+                except TimeoutException:
+                    print('One of the XPath elements timed out...\nskipping {} for {}...'.format(month, url))
+
         except AttributeError:
-            print('!' * 70)
-            print('NO TRANSACTIONS FOR LINK: ' + url)
-            print('!' * 70)
-            continue
+            # code block vestige to milbtransactionsv0.py; should be handled by codes in line 105 to 109
+            pass
+
+    print('=' * 70)
+    end = dt.datetime.now()
+    print('Total Web Scraping Time: ' + str(end - start), end='\n')
+    driver.close()
 
 
 FLgTransact()
