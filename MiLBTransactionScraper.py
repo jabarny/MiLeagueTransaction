@@ -18,7 +18,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC  # NOTE: webdriverwait conditions
 from selenium.webdriver.chrome.options import Options
 
-#relative links
+#relative lib
 from links import full_lg, CAL, SOU, EAS
 
 options = Options()  # makes Webdriver wait for the entire page is loaded when set to 'normal'
