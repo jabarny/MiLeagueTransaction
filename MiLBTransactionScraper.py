@@ -1,12 +1,15 @@
 #! python3 -i MiLBTransactionsv2.py
 # a script that opens, scrapes minor league transactions from milb.com pages.
 
+# standard lib
+import calendar
 import datetime as dt
 import time
-import calendar
 import re
+import sys # if you want to call from terminal
+
+# third party lib
 from bs4 import BeautifulSoup, SoupStrainer
-from links import full_lg, CAL, SOU, EAS
 from selenium import webdriver
 import selenium.webdriver.support.ui as ui
 from selenium.webdriver.common.by import \
@@ -14,6 +17,9 @@ from selenium.webdriver.common.by import \
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC  # NOTE: webdriverwait conditions
 from selenium.webdriver.chrome.options import Options
+
+#relative links
+from links import full_lg, CAL, SOU, EAS
 
 options = Options()  # makes Webdriver wait for the entire page is loaded when set to 'normal'
 options.page_load_strategy = 'normal'
